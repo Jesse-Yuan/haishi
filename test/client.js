@@ -4,6 +4,22 @@ var io = require('socket.io-client');
 var iostream = require('socket.io-stream');
 
 var client = io.connect('http://localhost:3000');
+var uploadPath = path.resolve(__dirname,'./uploads');
+var downloadPath = path.resolve(__dirname,'./downloads');
+
+//文件上传
+client.upload = function (filePath, fileName, fileType) {
+  var stream = iostream.createStream();
+  iostream(this).emit('upload', stream, { name: fileName, type: fileType});
+  fs.createReadStream(path.join(filePath,fileName)).pipe(stream);
+};
+
+//文件下载
+client.download = function (filePath, fileName, fileType) {
+  var stream = iostream.createStream();
+  iostream(this).emit('download', stream, { name: fileName, type: fileType});
+  stream.pipe(fs.createWriteStream(path.join(filePath,fileName)));
+};
 
 client.on('connect', function(){
   //权限验证
@@ -20,6 +36,13 @@ client.on('connect', function(){
     client.on('message', function(msg){
       console.log(msg);
     });
+
+    //上传文件
+    //client.upload(uploadPath, 'student.xls', 'others');
+
+    //下载文件
+    client.download(downloadPath, 'student.xls', 'others');
+
   });
 
   //验证失败
@@ -28,7 +51,5 @@ client.on('connect', function(){
   });
 });
 
-// var filename = 'student.xls';
-// var stream = iostream.createStream();
-// client.emit('upload', stream, { name:filename, type: 'others'});
-// fs.createReadStream(path.resolve(__dirname,filename)).pipe(stream);
+
+
