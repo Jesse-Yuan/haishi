@@ -1,7 +1,7 @@
 import express from 'express';
 import Client from '../models/Client';
-import Result,{SUCCESS,FAILUE} from '../lib/Result';
 
+import Result,{SUCCESS,FAILUE} from '../lib/Result';
 
 const router = express.Router();
 
@@ -11,7 +11,14 @@ router.get('/clients', (req,res) => {
     if(err){
       res.json(new Result(FAILUE, '获取客户端列表失败', err));
     }else{
-      res.json(new Result(SUCCESS, '获取客户端列表成功', null, clients));
+      let countOfOnline = 0;
+      clients.forEach(client=>{
+        if(client.status=='online'){
+          countOfOnline++;
+        }
+      });
+      let message = `当前在线:${countOfOnline}`;
+      res.json(new Result(SUCCESS, message, null, clients));
     }
   });
 });

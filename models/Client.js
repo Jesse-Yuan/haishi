@@ -5,6 +5,7 @@ const client = new mongoose.Schema({
   token: String,
   description: String,
   createTime: { type: Date, default: Date.now },
+  status: { type: String, default: 'offline' },
 });
 
 export default mongoose.model('Client', client);

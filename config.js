@@ -4,10 +4,6 @@ module.exports = {
     server: process.env.MONGO_URI || 'localhost',
     dbname: process.env.DATABASE_NAME || 'test'
   },
-  redis: {
-    server: process.env.REDIS_URI || 'localhost',
-    port: process.env.REDIS_PORT || 6379
-  },
   oss: {
     region: 'oss-cn-shenzhen',
     accessKeyId: 'LTAIzx1M7rvdWgkk',
