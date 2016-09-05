@@ -1,6 +1,11 @@
 import express from 'express';
-import Client from '../models/Client';
+import multer from 'multer';
 
+import oss from '../lib/AliossClient';
+import Client from '../models/Client';
+import File from '../models/File';
+
+import {fileType} from '../config';
 import Result,{SUCCESS,FAILUE} from '../lib/Result';
 
 const router = express.Router();
@@ -72,7 +77,21 @@ router.delete('/clinet/:id', (req,res) => {
 
 //获取文件列表
 router.get('/files', (req,res) => {
-
+  ((type) => {
+    switch (type){
+      case fileType[0]:
+      case fileType[1]:
+      case fileType[2]:
+      case fileType[3]:
+        return File.find({type:req.params.type});
+      default:
+        return File.find();
+    }
+  })(req.query.type).then(files => {
+    res.json(new Result(SUCCESS, '获取文件列表成功', null, files));
+  }).catch(err => {
+    res.json(new Result(FAILUE, '获取文件列表失败', err));
+  });
 });
 
 //获取某个文件的信息
@@ -80,13 +99,42 @@ router.get('/file/:id', (req,res) => {
 
 });
 
-//新建客户端
-router.post('/file/upload', (req,res) => {
+//指定上传文件的临时目录
+var upload = multer({dest:'temp/'});
+//文件上传
+router.post('/file/upload', upload.single('uploadFile'), (req,res) => {
+  let uploadFile = req.file;
+  let name = uploadFile.originalname;
+  let type = req.body.fileType;
+  let key = `${type}/${name}`;
 
+  Promise.all([
+    oss.put(key, uploadFile.path),
+    File.findOne({key}).then(file => {
+      if(file){
+        return File.update({key},{$set: {createTime:new Date()}});
+      }else{
+        return new File({name, type, key}).save();
+      }
+    })
+  ]).then(()=>{
+    res.json(new Result(SUCCESS, '文件上传成功'));
+  }).catch(err=>{
+    res.json(new Result(FAILUE, '文件上传失败', err));
+  });
 });
 
 router.delete('/file/:id', (req,res) => {
-
+  Promise.all([
+    File.findById(req.params.id).then(file => {
+      if(file) return oss.delete(file.key);
+    }),
+    File.remove({ _id: req.params.id })
+  ]).then(()=>{
+    res.json(new Result(SUCCESS, '文件删除成功'));
+  }).catch(err=>{
+    res.json(new Result(FAILUE, '文件删除失败', err));
+  });
 });
 
 export default router;
