@@ -1,0 +1,38 @@
+<div class="modal fade" id="add" tabindex="-1" role="dialog" aria-labelledby="modal-title">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">添加客户端</h4>
+      </div>
+      <div class="modal-body">
+        <form id="add-client"  class="form-horizontal" style="padding: 15px;" action="/api/client/add" method="post">
+          <div class="form-group">
+            <label class="col-sm-4 control-label">key</label>
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="client[key]"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">token</label>
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="client[token]"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label">备注</label>
+            <div class="col-sm-5">
+              <textarea class="form-control" name="client[description]"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="confirm" type="button" class="btn btn-primary">确认</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
