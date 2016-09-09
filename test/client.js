@@ -41,7 +41,7 @@ client.on('connect', function(){
     //client.upload(uploadPath, 'student.xls', 'others');
 
     //下载文件
-    client.download(downloadPath, 'student.xls', 'others');
+    //client.download(downloadPath, 'student.xls', 'others');
 
   });
 
@@ -50,6 +50,3 @@ client.on('connect', function(){
     console.log("There was an error with the authentication:", err.message);
   });
 });
-
-
-

@@ -7,7 +7,7 @@
       <div class="row">
         <%include menus%>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <p><button type="button" class="btn btn-default" data-toggle="modal" data-target="#upload">添加</button></p>
+          <p><button type="button" class="btn btn-default" data-toggle="modal" data-target="#upload">上传</button></p>
           <div id="files-table"></div>
         </div>
         <%include forms/uploadFile%>
@@ -64,8 +64,8 @@
         $('#files').addClass('active');
         $('#confirm').click(function () {
           $('#upload-file').ajaxSubmit({
-            success: function (data) {
-              alert(data.msg);
+            success: function (result) {
+              alert(result.msg);
               window.location.reload();
             }
           });

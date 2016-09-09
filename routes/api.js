@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from 'multer';
+import MD5 from 'md5-file';
 
 import oss from '../lib/AliossClient';
 import Client from '../models/Client';
@@ -14,7 +15,7 @@ const router = express.Router();
 router.get('/clients', (req,res) => {
   Client.find((err,clients) => {
     if(err){
-      res.json(new Result(FAILUE, '获取客户端列表失败', err));
+      res.json(new Result(FAILUE, `获取客户端列表失败:${err.message}`));
     }else{
       let countOfOnline = 0;
       clients.forEach(client=>{
@@ -23,7 +24,7 @@ router.get('/clients', (req,res) => {
         }
       });
       let message = `当前在线:${countOfOnline}`;
-      res.json(new Result(SUCCESS, message, null, clients));
+      res.json(new Result(SUCCESS, message, clients));
     }
   });
 });
@@ -32,9 +33,9 @@ router.get('/clients', (req,res) => {
 router.get('/client/:id', (req,res) => {
   Client.findById(req.params.id, (err,client) => {
     if(err){
-      res.json(new Result(FAILUE, '获取客户端信息失败', err));
+      res.json(new Result(FAILUE, `获取客户端信息失败:${err.message}`));
     }else{
-      res.json(new Result(SUCCESS, '获取客户端信息成功', null, client));
+      res.json(new Result(SUCCESS, '获取客户端信息成功', client));
     }
   });
 });
@@ -46,9 +47,9 @@ router.post('/client/add', (req,res) => {
     key,token,description
   }).save((err,client) => {
     if(err){
-      res.json(new Result(FAILUE, '保存失败', err));
+      res.json(new Result(FAILUE, `保存失败:${err.message}`));
     }else{
-      res.json(new Result(SUCCESS, '保存成功', null, client));
+      res.json(new Result(SUCCESS, '保存成功', client));
     }
   });
 });
@@ -88,9 +89,9 @@ router.get('/files', (req,res) => {
         return File.find();
     }
   })(req.query.type).then(files => {
-    res.json(new Result(SUCCESS, '获取文件列表成功', null, files));
+    res.json(new Result(SUCCESS, '获取文件列表成功', files));
   }).catch(err => {
-    res.json(new Result(FAILUE, '获取文件列表失败', err));
+    res.json(new Result(FAILUE, `获取文件列表失败:${err.message}`));
   });
 });
 
@@ -103,24 +104,32 @@ router.get('/file/:id', (req,res) => {
 var upload = multer({dest:'temp/'});
 //文件上传
 router.post('/file/upload', upload.single('uploadFile'), (req,res) => {
-  let uploadFile = req.file;
-  let name = uploadFile.originalname;
-  let type = req.body.fileType;
-  let key = `${type}/${name}`;
+  const uploadFile = req.file;
+  const name = uploadFile.originalname;
+  const type = req.body.fileType;
+  const key = `${type}/${name}`;
+  const md5 = MD5.sync(uploadFile.path);
 
   Promise.all([
-    oss.put(key, uploadFile.path),
     File.findOne({key}).then(file => {
       if(file){
-        return File.update({key},{$set: {createTime:new Date()}});
+        if(file.md5==md5) throw new Error('文件已存在');
+        return File.update({key}, {
+          $set: {
+            md5,
+            version: file.version +1,
+            uploadTime: new Date()
+          }
+        });
       }else{
-        return new File({name, type, key}).save();
+        return new File({name, type, key, md5}).save();
       }
-    })
-  ]).then(()=>{
+    }),
+    oss.put(key, uploadFile.path)
+  ]).then(() => {
     res.json(new Result(SUCCESS, '文件上传成功'));
   }).catch(err=>{
-    res.json(new Result(FAILUE, '文件上传失败', err));
+    res.json(new Result(FAILUE, `文件上传失败:${err.message}`));
   });
 });
 
@@ -128,12 +137,13 @@ router.delete('/file/:id', (req,res) => {
   Promise.all([
     File.findById(req.params.id).then(file => {
       if(file) return oss.delete(file.key);
+      throw new Error('文件不存在');
     }),
     File.remove({ _id: req.params.id })
   ]).then(()=>{
     res.json(new Result(SUCCESS, '文件删除成功'));
   }).catch(err=>{
-    res.json(new Result(FAILUE, '文件删除失败', err));
+    res.json(new Result(FAILUE, `文件删除失败:${err.message}`));
   });
 });
 
