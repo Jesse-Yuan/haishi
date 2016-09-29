@@ -95,11 +95,6 @@ router.get('/files', (req,res) => {
   });
 });
 
-//获取某个文件的信息
-router.get('/file/:id', (req,res) => {
-
-});
-
 //指定上传文件的临时目录
 var upload = multer({dest:'temp/'});
 //文件上传
@@ -108,7 +103,7 @@ router.post('/file/upload', upload.single('uploadFile'), (req,res) => {
   const name = uploadFile.originalname;
   const type = req.body.fileType;
   const key = `${type}/${name}`;
-  const md5 = MD5.sync(uploadFile.path);
+  const md5 = MD5.sync(uploadFile.path).toUpperCase();
 
   Promise.all([
     File.findOne({key}).then(file => {
@@ -133,6 +128,23 @@ router.post('/file/upload', upload.single('uploadFile'), (req,res) => {
   });
 });
 
+// 文件下载
+router.get('/file/download', (req, res) => {
+  File.findById(req.query.id).then(file => {
+    return oss.signatureUrl(file.key);
+  }).then(url => {
+    res.redirect(url);
+  }).catch(err => {
+    res.end(`文件上传失败:${err.message}`);
+  });
+});
+
+//获取某个文件的信息
+router.get('/file/:id', (req,res) => {
+
+});
+
+// 删除文件
 router.delete('/file/:id', (req,res) => {
   Promise.all([
     File.findById(req.params.id).then(file => {

@@ -29,6 +29,10 @@
         }
       }
 
+      function download(id) {
+        window.open('/api/file/download?id='+id);
+      }
+
       function loadFiles(type) {
         $.ajax({
           type:'GET',
@@ -48,7 +52,10 @@
                   html += '<td>'+file.name+'</td>';
                   html += '<td>'+file.type+'</td>';
                   html += '<td>'+file.createTime+'</td>';
-                  html += '<td><button type="button" class="btn btn-default" onclick="remove('+"'"+file._id+"'" +')">删除</button></td>';
+                  html += '<td>';
+                  html += '<button type="button" class="btn btn-default" onclick="remove('+"'"+file._id+"'" +')">删除</button>';
+                  html += '<button type="button" class="btn btn-default" onclick="download('+"'"+file._id+"'" +')">下载</button>';
+                  html += '<td>';
                   html += '</tr>';
                 });
                 html += '</tbody>';
