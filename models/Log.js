@@ -11,8 +11,7 @@ export default mongoose.model('Log', log);
 
 export const EVENT = {
   connect: 'connect',
-  time: 'time',
+  disconnect: 'disconnect',
   upload: 'upload',
-  download: 'download',
-  disconnect: 'disconnect'
+  download: 'download'
 };

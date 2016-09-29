@@ -8,3 +8,6 @@
 
 # Dependencie directory
 node_modules
+
+temp
+*.log
