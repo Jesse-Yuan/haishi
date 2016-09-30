@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path');
+var MD5 = require('md5-file');
 var io = require('socket.io-client');
 var iostream = require('socket.io-stream');
 
@@ -9,8 +10,9 @@ var downloadPath = path.resolve(__dirname,'./downloads');
 
 //文件上传
 client.upload = function (filePath, fileName, fileType) {
+  var md5 = MD5.sync(path.join(filePath,fileName));
   var stream = iostream.createStream();
-  iostream(this).emit('upload', stream, { name: fileName, type: fileType});
+  iostream(this).emit('upload', stream, { name: fileName, type: fileType, md5: md5});
   fs.createReadStream(path.join(filePath,fileName)).pipe(stream);
 };
 
