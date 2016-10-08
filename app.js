@@ -62,8 +62,9 @@ if (app.get('env') === 'development') {
   app.use(session({
     secret: 'haishi',
     cookie: { maxAge: 1000*60*60 },
-    resave: false,
-    saveUninitialized: true
+    resave: true,
+    rolling: true,
+    saveUninitialized: false
   }));
   app.use(logger('dev'));
 }else{
@@ -76,7 +77,8 @@ if (app.get('env') === 'development') {
     }),
     cookie: { maxAge: 1000*60*60 },
     resave: true,
-    saveUninitialized: true
+    rolling: true,
+    saveUninitialized: false
   }));
   app.use(log4js.connectLogger(log4js.getLogger("app"), {level: 'auto'}));
 }
