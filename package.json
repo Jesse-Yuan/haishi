@@ -16,6 +16,7 @@
     "express-session": "^1.14.1",
     "log4js": "^0.6.38",
     "md5-file": "^3.1.1",
+    "moment": "^2.15.1",
     "mongoose": "^4.5.9",
     "monitor.io": "^0.1.0",
     "multer": "^1.2.0",

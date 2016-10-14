@@ -1,11 +1,18 @@
 import mongoose from 'mongoose';
+import {timeFormat} from '../lib/Format';
 
 const log = new mongoose.Schema({
   client: String,
   event: String,
   description: String,
-  createTime: { type: Date, default: Date.now },
+  createTime: {
+    type: Date,
+    default: Date.now,
+    get: timeFormat
+  },
 });
+
+log.set('toJSON', { getters: true});
 
 export default mongoose.model('Log', log);
 
