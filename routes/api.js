@@ -13,30 +13,26 @@ const router = express.Router();
 
 //获取客户端列表
 router.get('/clients', (req,res) => {
-  Client.find((err,clients) => {
-    if(err){
-      res.json(new Result(FAILUE, `获取客户端列表失败:${err.message}`));
-    }else{
-      let countOfOnline = 0;
-      clients.forEach(client=>{
-        if(client.status=='online'){
-          countOfOnline++;
-        }
-      });
-      let message = `当前在线:${countOfOnline}`;
-      res.json(new Result(SUCCESS, message, clients));
-    }
+  Client.find().then(clients => {
+    let countOfOnline = 0;
+    clients.forEach(client=>{
+      if(client.status=='online'){
+        countOfOnline++;
+      }
+    });
+    let message = `当前在线:${countOfOnline}`;
+    res.json(new Result(SUCCESS, message, clients));
+  }).catch(err => {
+    res.json(new Result(FAILUE, `获取客户端列表失败:${err.message}`));
   });
 });
 
 //获取某个客户端的信息
 router.get('/client/:id', (req,res) => {
-  Client.findById(req.params.id, (err,client) => {
-    if(err){
-      res.json(new Result(FAILUE, `获取客户端信息失败:${err.message}`));
-    }else{
-      res.json(new Result(SUCCESS, '获取客户端信息成功', client));
-    }
+  Client.findById(req.params.id).then(client => {
+    res.json(new Result(SUCCESS, '获取客户端信息成功', client));
+  }).catch(err => {
+    res.json(new Result(FAILUE, `获取客户端信息失败:${err.message}`));
   });
 });
 
@@ -45,12 +41,10 @@ router.post('/client/add', (req,res) => {
   let {key,token,description} = req.body.client;
   new Client({
     key,token,description
-  }).save((err,client) => {
-    if(err){
-      res.json(new Result(FAILUE, `保存失败:${err.message}`));
-    }else{
-      res.json(new Result(SUCCESS, '保存成功', client));
-    }
+  }).save().then(client=>{
+    res.json(new Result(SUCCESS, '保存成功', client));
+  }).catch(err => {
+    res.json(new Result(FAILUE, `保存失败:${err.message}`));
   });
 });
 
@@ -59,20 +53,19 @@ router.post('/client/edit', (req,res) => {
   let {id,key,token,description} = req.body.client;
   Client.update({ _id: id },{
     $set: {key,token,description}
-  }, err => {
-    if (err) throw err;
-    res.json(new Result(SUCCESS, '保存修改成功'));
+  }).then(()=>{
+    res.json(new Result(SUCCESS, '修改客户端成功'));
+  }).catch(err => {
+    res.json(new Result(FAILUE, `修改客户端失败:${err.message}`));
   });
 });
 
 //删除客户端
-router.delete('/clinet/:id', (req,res) => {
-  Client.remove({ _id: req.params.id }, err => {
-    if(err){
-      res.json(new Result(FAILUE, '删除答题卡失败', err));
-    }else{
-      res.json(new Result(SUCCESS, '删除答题卡成功'));
-    }
+router.delete('/client/:id', (req,res) => {
+  Client.remove({ _id: req.params.id }).then(() => {
+    res.json(new Result(SUCCESS, '删除客户端成功'));
+  }).catch(err => {
+    res.json(new Result(FAILUE, `删除客户端失败${err.message}`));
   });
 });
 
@@ -141,7 +134,11 @@ router.get('/file/download', (req, res) => {
 
 //获取某个文件的信息
 router.get('/file/:id', (req,res) => {
-
+  File.findById(req.query.id).then(file => {
+    res.json(new Result(SUCCESS, '获取文件信息成功', file));
+  }).catch(err => {
+    res.json(new Result(FAILUE, `获取文件信息失败:${err.message}`));
+  });
 });
 
 // 删除文件
