@@ -1,16 +1,24 @@
 <!DOCTYPE html>
 <html>
-  <%include header%>
+  <head>
+    <meta charset=utf-8>
+    <meta http-equiv=X-UA-Compatible content="IE=edge">
+    <meta name=viewport content="width=device-width,initial-scale=1">
+    <title><%= title %></title>
+    <link rel=stylesheet href=//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css>
+    <link rel=stylesheet href=//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css>
+    <link rel=stylesheet href=/assets/css/app.f8ae37f0e58b937da718c0d8a4ea470d.css>
+    <!--[if lt IE 9]>
+    <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
   <body>
-    <%include navbar%>
-    <div class="container-fluid">
-      <div class="row">
-        <%include menus%>
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h1 class="page-header">Hello</h1>
-        </div>
-      </div>
-    </div>
-    <%include footer%>
+    <div id=app></div>
+    <script src=//cdn.bootcss.com/jquery/1.11.3/jquery.min.js></script>
+    <script src=//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js></script>
+    <script src=/assets/js/manifest.bf2ed1fdab7165b28c45.js></script>
+    <script src=/assets/js/vendor.feb45bdf4cfbdf705399.js></script>
+    <script src=/assets/js/app.8f71bc94db0e24a41310.js></script>
   </body>
 </html>

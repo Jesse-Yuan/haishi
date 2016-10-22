@@ -14,14 +14,7 @@ const router = express.Router();
 //获取客户端列表
 router.get('/clients', (req,res) => {
   Client.find().then(clients => {
-    let countOfOnline = 0;
-    clients.forEach(client=>{
-      if(client.status=='online'){
-        countOfOnline++;
-      }
-    });
-    let message = `当前在线:${countOfOnline}`;
-    res.json(new Result(SUCCESS, message, clients));
+    res.json(new Result(SUCCESS, '获取客户端列表成功', clients));
   }).catch(err => {
     res.json(new Result(FAILUE, `获取客户端列表失败:${err.message}`));
   });
@@ -38,7 +31,7 @@ router.get('/client/:id', (req,res) => {
 
 //新建客户端
 router.post('/client/add', (req,res) => {
-  let {key,token,description} = req.body.client;
+  let {key,token,description} = req.body;
   new Client({
     key,token,description
   }).save().then(client=>{
@@ -50,7 +43,7 @@ router.post('/client/add', (req,res) => {
 
 //编辑客户端信息
 router.post('/client/edit', (req,res) => {
-  let {id,key,token,description} = req.body.client;
+  let {id,key,token,description} = req.body;
   Client.update({ _id: id },{
     $set: {key,token,description}
   }).then(()=>{
