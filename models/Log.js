@@ -20,5 +20,7 @@ export const EVENT = {
   connect: 'connect',
   disconnect: 'disconnect',
   upload: 'upload',
-  download: 'download'
+  download: 'download',
+  update: 'update',
+  getUpdateFile: 'getUpdateFile',
 };

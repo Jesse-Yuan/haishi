@@ -6,14 +6,13 @@ import oss from '../lib/AliossClient';
 import Client from '../models/Client';
 import File from '../models/File';
 
-import {fileType} from '../config';
 import Result,{SUCCESS,FAILUE} from '../lib/Result';
 
 const router = express.Router();
 
 //获取客户端列表
 router.get('/clients', (req,res) => {
-  Client.find().then(clients => {
+  Client.find().populate('updateFile').then(clients => {
     res.json(new Result(SUCCESS, '获取客户端列表成功', clients));
   }).catch(err => {
     res.json(new Result(FAILUE, `获取客户端列表失败:${err.message}`));
@@ -22,7 +21,7 @@ router.get('/clients', (req,res) => {
 
 //获取某个客户端的信息
 router.get('/client/:id', (req,res) => {
-  Client.findById(req.params.id).then(client => {
+  Client.findById(req.params.id).populate('updateFile').then(client => {
     res.json(new Result(SUCCESS, '获取客户端信息成功', client));
   }).catch(err => {
     res.json(new Result(FAILUE, `获取客户端信息失败:${err.message}`));
@@ -53,6 +52,22 @@ router.post('/client/edit', (req,res) => {
   });
 });
 
+//设置客户端更新文件
+router.post('/client/setting', (req,res) => {
+  let {clientId,fileId} = req.body;
+  Promise.all([
+    Client.findById(clientId),
+    File.findById(fileId)
+  ]).then(([client, file]) => {
+    client.updateFile = file;
+    return client.save();
+  }).then(()=>{
+    res.json(new Result(SUCCESS, '设置客户端更新文件成功'));
+  }).catch(err => {
+    res.json(new Result(FAILUE, `设置客户端更新文件成功失败:${err.message}`));
+  });
+});
+
 //删除客户端
 router.delete('/client/:id', (req,res) => {
   Client.remove({ _id: req.params.id }).then(() => {
@@ -64,17 +79,19 @@ router.delete('/client/:id', (req,res) => {
 
 //获取文件列表
 router.get('/files', (req,res) => {
-  ((type) => {
-    switch (type){
-      case fileType[0]:
-      case fileType[1]:
-      case fileType[2]:
-      case fileType[3]:
-        return File.find({type:req.params.type});
-      default:
-        return File.find();
+  (({type, name}) => {
+    if(type){
+      if(name){
+        return File.find({type}).where('name', new RegExp(`${name}+`,'gi'));
+      }
+      return File.find({type});
+    } else {
+      if(name){
+        return File.find().where('name', new RegExp(`${name}+`,'gi'));
+      }
+      return File.find();
     }
-  })(req.query.type).then(files => {
+  })(req.query).then(files => {
     res.json(new Result(SUCCESS, '获取文件列表成功', files));
   }).catch(err => {
     res.json(new Result(FAILUE, `获取文件列表失败:${err.message}`));
